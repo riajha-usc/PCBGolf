@@ -52,30 +52,6 @@
 		)
 	)
 	(duplicate_pad_numbers_are_jumpers no)
-	(fp_poly
-		(pts
-			(xy -0.8 -1.8) (xy 0.8 -1.8) (xy 0.8 -2.5) (xy -0.8 -2.5)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(fill yes)
-		(layer "F.CrtYd")
-		(uuid "ed3f990d-0cf7-4b96-bfe3-0b5606e6bb3e")
-	)
-	(fp_poly
-		(pts
-			(xy -0.8 2.5) (xy 0.8 2.5) (xy 0.8 1.8) (xy -0.8 1.8)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(fill yes)
-		(layer "F.CrtYd")
-		(uuid "e5133fb4-b04f-4394-8b6c-1c3cb400a8c5")
-	)
 	(fp_line
 		(start -4.25 -1.35)
 		(end 4.25 -1.35)

@@ -1,0 +1,4 @@
+(version 1)
+(rule "JLC PTH to copper"
+  (constraint hole_clearance (min 0.28mm))
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole' && A.Net != B.Net"))

@@ -27,16 +27,26 @@ RULES = {
     "min_via_diameter": 0.30,
     "min_through_hole_diameter": 0.20,
     "min_hole_to_hole": 0.50,
-    "min_hole_clearance": 0.25,
+    "min_hole_clearance": 0.20,
     "min_copper_edge_clearance": 0.25,
 }
 
-DEFAULT_CLASS = {"clearance": 0.2, "track_width": 0.2,
+# Class clearance = JLC's SMD pad-to-pad minimum (0.15). Anything larger flags
+# every 0.5 mm-pitch part: the tightest in-footprint gap here is U4 at 0.1626.
+DEFAULT_CLASS = {"clearance": 0.15, "track_width": 0.2,
                  "via_diameter": 0.4, "via_drill": 0.2}
 
 POWER_CLASS = {"name": "Power", "priority": 0,
-               "clearance": 0.25, "track_width": 0.5,
+               "clearance": 0.15, "track_width": 0.5,
                "via_diameter": 0.6, "via_drill": 0.3}
+
+# JLC: via hole / NPTH to track 0.20 (the board-level hole clearance above);
+# plated through-hole to track 0.28, which needs its own rule.
+DRU = """(version 1)
+(rule "JLC PTH to copper"
+  (constraint hole_clearance (min 0.28mm))
+  (condition "A.Type == 'Pad' && A.Pad_Type == 'Through-hole' && A.Net != B.Net"))
+"""
 
 POWER_PATTERNS = ["+12V", "+5V", "+3V3", "GND", "VBUS",
                   "Net-(J1-PWR)", "Net-(J?-VBUS-PadA4)"]
@@ -122,8 +132,10 @@ def main(argv=None) -> int:
 
     pcb_text, pcb_notes = patch_pcb(args.pcb.read_text())
     pro, pro_notes = patch_pro(json.loads(args.pro.read_text()))
+    dru = args.pro.with_suffix(".kicad_dru")
+    dru_notes = [] if dru.exists() and dru.read_text() == DRU else [f"write {dru.name} (PTH hole clearance 0.28)"]
 
-    for label, notes in ((args.pcb.name, pcb_notes), (args.pro.name, pro_notes)):
+    for label, notes in ((args.pcb.name, pcb_notes), (args.pro.name, pro_notes), (dru.name, dru_notes)):
         print(f"{label}:")
         for n in notes or ["  (no change)"]:
             print(f"  {n}")
@@ -131,8 +143,9 @@ def main(argv=None) -> int:
     if args.write:
         args.pcb.write_text(pcb_text)
         args.pro.write_text(json.dumps(pro, indent=2) + "\n")
+        dru.write_text(DRU)
         print("\nwritten. Quit and reopen KiCad so it reloads both files.")
-    elif pcb_notes or pro_notes:
+    elif pcb_notes or pro_notes or dru_notes:
         print("\ndry run -- re-run with --write to apply")
     return 0
 
